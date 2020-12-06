@@ -117,22 +117,22 @@ def set_default_position(position):
     player_list[0].position = position
     x = player_list[0].board[player_list[0].position].x
     y = player_list[0].board[player_list[0].position].y
-    pawn_id= player_list[0].idx_pawn_in_game
+    pawn_id = player_list[0].idx_pawn_in_game
     pawn = player_list[0].pawns[pawn_id]
     sachovnica[x][y] = pawn.image
 
 
 def set_position(roll_dice):
-    currentPosition = player_list[0].position
-    currentPosition += roll_dice
-    if currentPosition < len(player_list[0].board):
+    current_position = player_list[0].position
+    current_position += roll_dice
+    if current_position < len(player_list[0].board):
         # na povodnu poziciu dame *
         x = player_list[0].board[player_list[0].position].x
         y = player_list[0].board[player_list[0].position].y
         sachovnica[x][y] = player_list[0].board[player_list[0].position].image
 
         # na novu dame figurku
-        player_list[0].position = currentPosition
+        player_list[0].position = current_position
         x = player_list[0].board[player_list[0].position].x
         y = player_list[0].board[player_list[0].position].y
         pawn_id = player_list[0].idx_pawn_in_game
@@ -140,7 +140,7 @@ def set_position(roll_dice):
         sachovnica[x][y] = pawn.image
 
         # kontrola ci je v domceku
-        if (currentPosition + 1) == len(player_list[0].board):
+        if (current_position + 1) == len(player_list[0].board):
             pawn = player_list[0].pawns[pawn_id]
             pawn.is_in_home = True
             player_list[0].finished = player_list[0].take_another_pawn()
@@ -166,9 +166,9 @@ def gen_playing_field_a():
     set_default_position(0)
 
 
-def load_quadrant_1_a(rowBeg, rowEnd, colBeg, colEnd):
-    for row in range(rowBeg, rowEnd):
-        for col in range(colBeg, colEnd):
+def load_quadrant_1_a(row_beg, row_end, col_beg, col_end):
+    for row in range(row_beg, row_end):
+        for col in range(col_beg, col_end):
             if sachovnica[row][col] == '*':
                 point = Point()
                 point.x = row
@@ -177,9 +177,9 @@ def load_quadrant_1_a(rowBeg, rowEnd, colBeg, colEnd):
                 player_list[0].board.append(point)
 
 
-def load_quadrant_2_a(rowBeg, rowEnd, colBeg, colEnd):
-    for row in range(rowBeg, rowEnd):
-        for col in range(colBeg, colEnd, -1):
+def load_quadrant_2_a(row_beg, row_end, col_beg, col_end):
+    for row in range(row_beg, row_end):
+        for col in range(col_beg, col_end, -1):
             if sachovnica[row][col] == '*':
                 point = Point()
                 point.x = row
@@ -188,9 +188,9 @@ def load_quadrant_2_a(rowBeg, rowEnd, colBeg, colEnd):
                 player_list[0].board.append(point)
 
 
-def load_quadrant_3_a(rowBeg, rowEnd, colBeg, colEnd):
-    for row in range(rowBeg, rowEnd, -1):
-        for col in range(colBeg, colEnd, -1):
+def load_quadrant_3_a(row_beg, row_end, col_beg, col_end):
+    for row in range(row_beg, row_end, -1):
+        for col in range(col_beg, col_end, -1):
             if sachovnica[row][col] == '*':
                 point = Point()
                 point.x = row
@@ -199,9 +199,9 @@ def load_quadrant_3_a(rowBeg, rowEnd, colBeg, colEnd):
                 player_list[0].board.append(point)
 
 
-def load_quadrant_4_a(rowBeg, rowEnd, colBeg, colEnd):
-    for row in range(rowBeg, rowEnd, -1):
-        for col in range(colBeg, colEnd):
+def load_quadrant_4_a(row_beg, row_end, col_beg, col_end):
+    for row in range(row_beg, row_end, -1):
+        for col in range(col_beg, col_end):
             if sachovnica[row][col] == '*':
                 point = Point()
                 point.x = row
@@ -211,9 +211,9 @@ def load_quadrant_4_a(rowBeg, rowEnd, colBeg, colEnd):
     player_list[0].last_position = len(player_list[0].board) + 1
 
 
-def load_homes_a(rowBeg, rowEnd, colBeg, colEnd):
-    for row in range(rowBeg, rowEnd):
-        for col in range(colBeg, colEnd):
+def load_homes_a(row_beg, row_end, col_beg, col_end):
+    for row in range(row_beg, row_end):
+        for col in range(col_beg, col_end):
             if sachovnica[row][col] == 'D':
                 point = Point()
                 point.x = row
@@ -233,16 +233,18 @@ def roll_dice():
     return rolled_number
 
 
-def run_game():
-    for s in range(100):
-        cislo = roll_dice()
-        print('\nHodené číslo: ', cislo, s)
-        jeVdomceku = set_position(cislo)
+def run_game(counter=0):
+    while True:
+        counter += 1
+        print('\nŤah:', counter)
+        num = roll_dice()
+        print('Hodené číslo:', num)
+        is_in_home = set_position(num)
         if player_list[0].finished is True:
             tlacsachovnicu(sachovnica)
             print('Skoncil hru')
             break
-        if jeVdomceku is True:
+        if is_in_home is True:
             # list_hracov[0].zoberDalsiuFigurku()
             set_default_position(0)
         tlacsachovnicu(sachovnica)

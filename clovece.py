@@ -2,10 +2,10 @@ import random
 
 # GLOBALNE PREMENNE
 # zadanie vstupu
-vstup = int(input('Zadajte rozmer hracej plochy: '))
+board_size_input = int(input('Zadajte rozmer hracej plochy: '))
 # vytvorenie listu s n vnorenymi listami = Pocet riadkov a stlpcov
-sachovnica = [[''] * (vstup + 1) for i in range(vstup + 1)]
-list_hracov = []
+sachovnica = [[''] * (board_size_input + 1) for i in range(board_size_input + 1)]
+player_list = []
 
 
 # triedy
@@ -25,28 +25,28 @@ class Pawn:
 
 
 class Player:
-    figurky = []
-    hracie_pole = []
-    pocet_figuriek = 0
-    idx_figurka_v_hre = 0
-    pozicia = 0
-    posledna_hracia_pozicia = 0
-    skoncil_hru = False
+    pawns = []
+    board = []
+    number_of_pawns = 0
+    idx_pawn_in_game = 0
+    position = 0
+    last_position = 0
+    finished = False
 
-    def zober_dalsiu_figurku(self):
-        for i in range(len(self.figurky)):
-            figurka = self.figurky[i]
-            if figurka.is_in_home is False:
-                self.idx_figurka_v_hre = i
+    def take_another_pawn(self):
+        for i in range(len(self.pawns)):
+            pawn = self.pawns[i]
+            if pawn.is_in_home is False:
+                self.idx_pawn_in_game = i
                 return False
         return True
 
 
 def gensachovnicu(n):
     # generovanie sachovnice s rozmermi n * n
-    for row in range(n+1):
+    for row in range(n + 1):
         if row == 0:
-            for col in range(n+1):
+            for col in range(n + 1):
                 if col == 0:
                     sachovnica[0][0] = ' '
                 else:
@@ -64,13 +64,6 @@ def gensachovnicu(n):
                         sachovnica[row][0] = row - 1
                 elif col == (n + 1) / 2 or col == ((n + 1) / 2) - 1 or col == ((n + 1) / 2) + 1:
                     sachovnica[row][col] = '*'
-                    '''if (row > 1 or row < 4) and col == 6:
-                        sachovnica[row][col] = 'A'
-                    point = Bod()
-                    point.x = row
-                    point.y = col
-                    point.image = '*'
-                    list_hracov[0].hracie_pole.append(point)'''
                 else:
                     sachovnica[row][col] = ' '
 
@@ -85,13 +78,6 @@ def gensachovnicu(n):
                     sachovnica[row][col] = 'D'
                 elif col == ((n + 1) / 2) - 1 or col == ((n + 1) / 2) + 1:
                     sachovnica[row][col] = '*'
-                    '''if (row > 1 or row < 4) and col == 6:
-                        sachovnica[row][col] = 'A'
-                    point = Bod()
-                    point.x = row
-                    point.y = col
-                    point.image = '*'
-                    list_hracov[0].hracie_pole.append(point)'''
                 else:
                     sachovnica[row][col] = ' '
         elif row == ((n + 1) / 2) - 1 or row == ((n + 1) / 2) + 1:
@@ -105,13 +91,6 @@ def gensachovnicu(n):
                     sachovnica[row][col] = 'D'
                 else:
                     sachovnica[row][col] = '*'
-                    '''if (row > 1 or row < 4) and col == 6:
-                        sachovnica[row][col] = 'A'
-                    point = Bod()
-                    point.x = row
-                    point.y = col
-                    point.image = '*'
-                    list_hracov[0].hracie_pole.append(point)'''
         else:
             for col in range(n + 1):
                 if col == 0:
@@ -123,84 +102,71 @@ def gensachovnicu(n):
                     sachovnica[row][col] = 'X'
                 elif col == 1 or col == n:
                     sachovnica[row][col] = '*'
-                    '''point = Bod()
-                    point.x = row
-                    point.y = col
-                    point.image = '*'
-                    list_hracov[0].hracie_pole.append(point)'''
                 else:
                     sachovnica[row][col] = 'D'
-                    '''list_hracov[0].pocet_figuriek += 1
-                    point = Bod()
-                    point.x = row
-                    point.y = col
-                    point.image = 'D'
-                    list_hracov[0].hracie_pole.append(point)'''
     return sachovnica
 
 
-def loadFigurky(idxHrac):
+def load_pawns(idx_player):
     for i in range(3):
         image = 'A' + str(i)
-        list_hracov[idxHrac].figurky.append(Pawn(image, False))
+        player_list[idx_player].pawns.append(Pawn(image, False))
 
 
-def nastavDefaultPoziciu(pozicia):
-    list_hracov[0].pozicia = pozicia
-    x = list_hracov[0].hracie_pole[list_hracov[0].pozicia].x
-    y = list_hracov[0].hracie_pole[list_hracov[0].pozicia].y
-    idFigurky = list_hracov[0].idx_figurka_v_hre
-    figurka = list_hracov[0].figurky[idFigurky]
-    sachovnica[x][y] = figurka.image
+def set_default_position(position):
+    player_list[0].position = position
+    x = player_list[0].board[player_list[0].position].x
+    y = player_list[0].board[player_list[0].position].y
+    pawn_id= player_list[0].idx_pawn_in_game
+    pawn = player_list[0].pawns[pawn_id]
+    sachovnica[x][y] = pawn.image
 
 
-def nastavPoziciu(hodKockou):
-    currentPosition = list_hracov[0].pozicia
-    currentPosition += hodKockou
-    if currentPosition < len(list_hracov[0].hracie_pole):
-
+def set_position(roll_dice):
+    currentPosition = player_list[0].position
+    currentPosition += roll_dice
+    if currentPosition < len(player_list[0].board):
         # na povodnu poziciu dame *
-        x = list_hracov[0].hracie_pole[list_hracov[0].pozicia].x
-        y = list_hracov[0].hracie_pole[list_hracov[0].pozicia].y
-        sachovnica[x][y] = list_hracov[0].hracie_pole[list_hracov[0].pozicia].image
+        x = player_list[0].board[player_list[0].position].x
+        y = player_list[0].board[player_list[0].position].y
+        sachovnica[x][y] = player_list[0].board[player_list[0].position].image
 
         # na novu dame figurku
-        list_hracov[0].pozicia = currentPosition
-        x = list_hracov[0].hracie_pole[list_hracov[0].pozicia].x
-        y = list_hracov[0].hracie_pole[list_hracov[0].pozicia].y
-        idFigurky = list_hracov[0].idx_figurka_v_hre
-        figurka = list_hracov[0].figurky[idFigurky]
-        sachovnica[x][y] = figurka.image
+        player_list[0].position = currentPosition
+        x = player_list[0].board[player_list[0].position].x
+        y = player_list[0].board[player_list[0].position].y
+        pawn_id = player_list[0].idx_pawn_in_game
+        pawn = player_list[0].pawns[pawn_id]
+        sachovnica[x][y] = pawn.image
 
         # kontrola ci je v domceku
-        if (currentPosition + 1) == len(list_hracov[0].hracie_pole):
-            figurka = list_hracov[0].figurky[idFigurky]
-            figurka.is_in_home = True
-            list_hracov[0].skoncil_hru = list_hracov[0].zober_dalsiu_figurku()
-            list_hracov[0].hracie_pole.pop()
+        if (currentPosition + 1) == len(player_list[0].board):
+            pawn = player_list[0].pawns[pawn_id]
+            pawn.is_in_home = True
+            player_list[0].finished = player_list[0].take_another_pawn()
+            player_list[0].board.pop()
             return True
-
         return False
     else:
         return False
 
 
-def f_vstup(x):
+def check_input(x):
     # overenie ci je rozmery neparne cislo
     if x % 2 == 0:
         raise ValueError('Cislo musi byt neparne')
 
 
-def genHraciePoleA():
-    loadKvadrant1A(0, 6, 6, 10)
-    loadKvadrant2A(6, 10, 9, 4)
-    loadKvadrant3A(9, 4, 4, 0)
-    loadKvadrant4A(4, 0, 1, 6)
-    loadDomcekyA(0, 5, 4, 6)
-    nastavDefaultPoziciu(0)
+def gen_playing_field_a():
+    load_quadrant_1_a(0, 6, 6, 10)
+    load_quadrant_2_a(6, 10, 9, 4)
+    load_quadrant_3_a(9, 4, 4, 0)
+    load_quadrant_4_a(4, 0, 1, 6)
+    load_homes_a(0, 5, 4, 6)
+    set_default_position(0)
 
 
-def loadKvadrant1A(rowBeg, rowEnd, colBeg, colEnd):
+def load_quadrant_1_a(rowBeg, rowEnd, colBeg, colEnd):
     for row in range(rowBeg, rowEnd):
         for col in range(colBeg, colEnd):
             if sachovnica[row][col] == '*':
@@ -208,10 +174,10 @@ def loadKvadrant1A(rowBeg, rowEnd, colBeg, colEnd):
                 point.x = row
                 point.y = col
                 point.image = sachovnica[row][col]
-                list_hracov[0].hracie_pole.append(point)
+                player_list[0].board.append(point)
 
 
-def loadKvadrant2A(rowBeg, rowEnd, colBeg, colEnd):
+def load_quadrant_2_a(rowBeg, rowEnd, colBeg, colEnd):
     for row in range(rowBeg, rowEnd):
         for col in range(colBeg, colEnd, -1):
             if sachovnica[row][col] == '*':
@@ -219,10 +185,10 @@ def loadKvadrant2A(rowBeg, rowEnd, colBeg, colEnd):
                 point.x = row
                 point.y = col
                 point.image = sachovnica[row][col]
-                list_hracov[0].hracie_pole.append(point)
+                player_list[0].board.append(point)
 
 
-def loadKvadrant3A(rowBeg, rowEnd, colBeg, colEnd):
+def load_quadrant_3_a(rowBeg, rowEnd, colBeg, colEnd):
     for row in range(rowBeg, rowEnd, -1):
         for col in range(colBeg, colEnd, -1):
             if sachovnica[row][col] == '*':
@@ -230,10 +196,10 @@ def loadKvadrant3A(rowBeg, rowEnd, colBeg, colEnd):
                 point.x = row
                 point.y = col
                 point.image = sachovnica[row][col]
-                list_hracov[0].hracie_pole.append(point)
+                player_list[0].board.append(point)
 
 
-def loadKvadrant4A(rowBeg, rowEnd, colBeg, colEnd):
+def load_quadrant_4_a(rowBeg, rowEnd, colBeg, colEnd):
     for row in range(rowBeg, rowEnd, -1):
         for col in range(colBeg, colEnd):
             if sachovnica[row][col] == '*':
@@ -241,11 +207,11 @@ def loadKvadrant4A(rowBeg, rowEnd, colBeg, colEnd):
                 point.x = row
                 point.y = col
                 point.image = sachovnica[row][col]
-                list_hracov[0].hracie_pole.append(point)
-    list_hracov[0].posledna_hracia_pozicia = len(list_hracov[0].hracie_pole) + 1
+                player_list[0].board.append(point)
+    player_list[0].last_position = len(player_list[0].board) + 1
 
 
-def loadDomcekyA(rowBeg, rowEnd, colBeg, colEnd):
+def load_homes_a(rowBeg, rowEnd, colBeg, colEnd):
     for row in range(rowBeg, rowEnd):
         for col in range(colBeg, colEnd):
             if sachovnica[row][col] == 'D':
@@ -253,7 +219,7 @@ def loadDomcekyA(rowBeg, rowEnd, colBeg, colEnd):
                 point.x = row
                 point.y = col
                 point.image = sachovnica[row][col]
-                list_hracov[0].hracie_pole.append(point)
+                player_list[0].board.append(point)
 
 
 def tlacsachovnicu(sachovnica):
@@ -262,31 +228,31 @@ def tlacsachovnicu(sachovnica):
         print(' ' .join([str(elem) for elem in row]))
 
 
-def hodKockou():
-    hodeneCislo = random.randint(1, 6)
-    return hodeneCislo
+def roll_dice():
+    rolled_number = random.randint(1, 6)
+    return rolled_number
 
 
-def spustHru():
+def run_game():
     for s in range(100):
-        cislo = hodKockou()
+        cislo = roll_dice()
         print('\nHodené číslo: ', cislo, s)
-        jeVdomceku = nastavPoziciu(cislo)
-        if list_hracov[0].skoncil_hru is True:
+        jeVdomceku = set_position(cislo)
+        if player_list[0].finished is True:
             tlacsachovnicu(sachovnica)
             print('Skoncil hru')
             break
         if jeVdomceku is True:
             # list_hracov[0].zoberDalsiuFigurku()
-            nastavDefaultPoziciu(0)
+            set_default_position(0)
         tlacsachovnicu(sachovnica)
 
 
-f_vstup(vstup)
-gensachovnicu(vstup)
-list_hracov.append(Player())
-list_hracov.append(Player())
-loadFigurky(0)  # pre hraca A
-genHraciePoleA()
+check_input(board_size_input)
+gensachovnicu(board_size_input)
+player_list.append(Player())
+player_list.append(Player())
+load_pawns(0)  # pre hraca A
+gen_playing_field_a()
 tlacsachovnicu(sachovnica)
-spustHru()
+run_game()

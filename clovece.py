@@ -197,12 +197,12 @@ def gen_playing_field(board_size, idx_player):
     Commented ref values are for board_size 9."""
     r_start = int(((board_size + 1) / 2) + 1)  # 6
     r_end = int(((board_size + 1) / 2) - 1)  # 4
-    max = int(board_size + 1)  # 10
+    pf_max = int(board_size + 1)  # 10
     c_start = int(board_size)  # 9
     c_end = int((board_size + 1) / 2)  # 5
     if idx_player == 0:
-        load_quadrant_1(0, r_start, r_start, max, idx_player)
-        load_quadrant_2(r_start, max, c_start, r_end, idx_player)
+        load_quadrant_1(0, r_start, r_start, pf_max, idx_player)
+        load_quadrant_2(r_start, pf_max, c_start, r_end, idx_player)
         load_quadrant_3(c_start, r_end, r_end, 0, idx_player)
         load_quadrant_4(r_end, 0, 1, r_start, idx_player)
         load_homes(0, c_end, r_end, r_start, idx_player)
@@ -210,8 +210,8 @@ def gen_playing_field(board_size, idx_player):
     elif idx_player == 1:
         load_quadrant_3(c_start, r_end, r_end, 0, idx_player)
         load_quadrant_4(r_end, 0, 1, r_start, idx_player)
-        load_quadrant_1(0, r_start, r_start, max, idx_player)
-        load_quadrant_2(r_start, max, c_start, r_end, idx_player)
+        load_quadrant_1(0, r_start, r_start, pf_max, idx_player)
+        load_quadrant_2(r_start, pf_max, c_start, r_end, idx_player)
         load_homes(c_start, c_end, r_end, r_start, idx_player)
         set_default_position(0, idx_player)
 

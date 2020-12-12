@@ -6,7 +6,7 @@ board_size_input = int(input('Enter board size: '))
 # Initialization of main elements.
 sachovnica = [[''] * (board_size_input + 1) for i in range(board_size_input + 1)]
 player_list = []
-
+max_players = 2
 
 # Classes
 class Point:
@@ -28,13 +28,22 @@ class Pawn:
 
 class Player:
     """One player."""
-    pawns = []
+    '''pawns = []
     board = []
     number_of_pawns = 0
     idx_pawn_in_game = 0
     position = 0
     last_position = 0
-    finished = False
+    finished = False'''
+
+    def __init__(self):
+        self.pawns = []
+        self.board = []
+        self.number_of_pawns = 0
+        self.idx_pawn_in_game = 0
+        self.position = 0
+        self.last_position = 0
+        self.finished = False
 
     def take_another_pawn(self):
         """Take next pawn if previous is in home."""
@@ -141,7 +150,7 @@ def load_quadrant_1(row_beg, row_end, col_beg, col_end, idx_player):
                 point.x = row
                 point.y = col
                 point.image = sachovnica[row][col]
-                player_list[0].board.append(point)
+                player_list[idx_player].board.append(point)
 
 
 def load_quadrant_2(row_beg, row_end, col_beg, col_end, idx_player):
@@ -191,7 +200,7 @@ def load_homes(row_beg, row_end, col_beg, col_end, idx_player):
                     point.image = sachovnica[row][col]
                     player_list[idx_player].board.append(point)
     elif idx_player == 1:
-        for row in range(row_beg, row_end):
+        for row in range(row_beg, row_end, -1):
             for col in range(col_beg, col_end):
                 if sachovnica[row][col] == 'D':
                     point = Point()
@@ -216,53 +225,53 @@ def gen_playing_field(board_size, idx_player):
         load_quadrant_3(c_start, r_end, r_end, 0, idx_player)
         load_quadrant_4(r_end, 0, 1, r_start, idx_player)
         load_homes(0, c_end, r_end, r_start, idx_player)
-        set_default_position(0)
+        set_default_position(0, idx_player)
     elif idx_player == 1:
         load_quadrant_3(c_start, r_end, r_end, 0, idx_player)
         load_quadrant_4(r_end, 0, 1, r_start, idx_player)
         load_quadrant_1(0, r_start, r_start, r_max, idx_player)
         load_quadrant_2(r_start, r_max, c_start, r_end, idx_player)
-        load_homes(r_max, r_end, r_end, r_start, idx_player)
-        set_default_position(0)
+        load_homes(c_start, c_end, r_end, r_start, idx_player)
+        set_default_position(0, idx_player)
 
 
 
-def set_default_position(position):
+def set_default_position(position, idx_player):
     """Set starting position for every pawn."""
-    player_list[0].position = position
-    x = player_list[0].board[player_list[0].position].x
-    y = player_list[0].board[player_list[0].position].y
-    pawn_id = player_list[0].idx_pawn_in_game
-    pawn = player_list[0].pawns[pawn_id]
+    player_list[idx_player].position = position
+    x = player_list[idx_player].board[player_list[idx_player].position].x
+    y = player_list[idx_player].board[player_list[idx_player].position].y
+    pawn_id = player_list[idx_player].idx_pawn_in_game
+    pawn = player_list[idx_player].pawns[pawn_id]
     sachovnica[x][y] = pawn.image
 
 
-def set_position(roll_dice):
+def set_position(roll_dice, idx_player):
     """Set new position by adding rolled number to current position."""
-    current_position = player_list[0].position
+    current_position = player_list[idx_player].position
     current_position += roll_dice
-    if current_position < len(player_list[0].board):
+    if current_position < len(player_list[idx_player].board):
 
         # Set previous image on field from which is pawn moving.
-        x = player_list[0].board[player_list[0].position].x
-        y = player_list[0].board[player_list[0].position].y
-        sachovnica[x][y] = player_list[0].board[player_list[0].position].image
+        x = player_list[idx_player].board[player_list[idx_player].position].x
+        y = player_list[idx_player].board[player_list[idx_player].position].y
+        sachovnica[x][y] = player_list[idx_player].board[player_list[idx_player].position].image
 
         # Place pawn on new position.
-        player_list[0].position = current_position
-        x = player_list[0].board[player_list[0].position].x
-        y = player_list[0].board[player_list[0].position].y
-        pawn_id = player_list[0].idx_pawn_in_game
-        pawn = player_list[0].pawns[pawn_id]
+        player_list[idx_player].position = current_position
+        x = player_list[idx_player].board[player_list[idx_player].position].x
+        y = player_list[idx_player].board[player_list[idx_player].position].y
+        pawn_id = player_list[idx_player].idx_pawn_in_game
+        pawn = player_list[idx_player].pawns[pawn_id]
         sachovnica[x][y] = pawn.image
 
         # Checks if pawn is in home.
         # Incrementing current_position to match length of board
-        if (current_position + 1) == len(player_list[0].board):
-            pawn = player_list[0].pawns[pawn_id]
+        if (current_position + 1) == len(player_list[idx_player].board):
+            pawn = player_list[idx_player].pawns[pawn_id]
             pawn.is_in_home = True
-            player_list[0].finished = player_list[0].take_another_pawn()        # Taking out another pawn
-            player_list[0].board.pop()      # Removing last element from board because it's occupied by our pawn
+            player_list[idx_player].finished = player_list[idx_player].take_another_pawn()        # Taking out another pawn
+            player_list[idx_player].board.pop()      # Removing last element from board because it's occupied by our pawn
             return True
         return False
     else:
@@ -283,27 +292,38 @@ def roll_dice():
 
 def run_game(counter=0):
     """Starts our game loop."""
+    idx_player = 0
     while True:
         counter += 1        # Counting number of moves.
         print('\nMove no.:', counter)
         num = roll_dice()
         print('Rolled number:', num)
-        is_in_home = set_position(num)
-        if player_list[0].finished is True:
+        is_in_home = set_position(num, idx_player)
+        if player_list[idx_player].finished is True:
             tlacsachovnicu(sachovnica)
-            print('Player finished.')
+            print('Player finished.', idx_player)
             break
         if is_in_home is True:
-            set_default_position(0)
+            set_default_position(0, idx_player)
+            set_default_position(0, idx_player)
+        if idx_player < max_players - 1:
+            idx_player += 1
+        else:
+            idx_player = 0
         tlacsachovnicu(sachovnica)
 
 
 check_input(board_size_input)
 gensachovnicu(board_size_input)
+# Create players
+playerA = Player()
+playerB = Player()
 # Adding players
-player_list.append(Player())
-player_list.append(Player())
+player_list.append(playerA)
+player_list.append(playerB)
 load_pawns(0, board_size_input)     # For Player(0) - A.
-gen_playing_field(board_size_input, 0)      # For Player(0)
+load_pawns(1, board_size_input)
+gen_playing_field(board_size_input, 0)  # For Player(0)
+gen_playing_field(board_size_input, 1)
 tlacsachovnicu(sachovnica)      # Printing our board with initial positions
 run_game()

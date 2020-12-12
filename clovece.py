@@ -1,41 +1,24 @@
 import random
 
-# Global variables
-# Prompt user to input board size.
-board_size_input = int(input('Enter board size: '))
-# Initialization of main elements.
-sachovnica = [[''] * (board_size_input + 1) for i in range(board_size_input + 1)]
-player_list = []
-max_players = 2
 
 # Classes
 class Point:
-    """Class for one point in game board."""
-    x = 0
-    y = 0
-    image = ''
+    """Constructing one point in game board."""
+    def __init__(self, x, y, image):
+        self.x = x
+        self.y = y
+        self.image = image
 
 
 class Pawn:
     """Constructing pawns for each player."""
-    image = ''
-    is_in_home = False
-
     def __init__(self, image, is_in_home):
         self.image = image
         self.is_in_home = is_in_home
 
 
 class Player:
-    """One player."""
-    '''pawns = []
-    board = []
-    number_of_pawns = 0
-    idx_pawn_in_game = 0
-    position = 0
-    last_position = 0
-    finished = False'''
-
+    """Constructing one player."""
     def __init__(self):
         self.pawns = []
         self.board = []
@@ -54,20 +37,37 @@ class Player:
                 return False
         return True
 
+    def add_point_to_board(self, row, col, image):
+        """Add point to players gaming board."""
+        if sachovnica[row][col] == image:
+            self.board.append(Point(row, col, sachovnica[row][col]))
 
-def check_input(x):
-    """Checks input if it is not even."""
-    if x % 2 == 0:
-        raise ValueError('Input must not be even.')
-    elif x <= 5:
-        raise ValueError('Input must be greater than 5.')
+    def place_pawn(self):
+        """Place pawn on new position."""
+        x = self.board[self.position].x
+        y = self.board[self.position].y
+        pawn_id = self.idx_pawn_in_game
+        pawn = self.pawns[pawn_id]
+        sachovnica[x][y] = pawn.image
+
+
+def check_input():
+    """Checks input if it is not even and greater than 5."""
+    err_mes = 'Invalid input! Input must not be even and must be greater than 5.'
+    while True:
+        board_size = int(input('Enter board size: '))
+        if not input:
+            print(err_mes)
+        elif board_size % 2 == 0 or board_size <= 5:
+            print(err_mes)
+        else:
+            break
+    return board_size
 
 
 def gensachovnicu(n):
     """Generates our game board of size n * n.
-
     n is board_size_input that user inputs.
-
     Returning our board in 2D list.
     """
     for row in range(n + 1):
@@ -80,7 +80,6 @@ def gensachovnicu(n):
                         sachovnica[0][col] = col - 11
                     else:
                         sachovnica[0][col] = col - 1
-
         elif row == 1 or row == n:
             for col in range(n+1):
                 if col == 0:
@@ -92,7 +91,6 @@ def gensachovnicu(n):
                     sachovnica[row][col] = '*'
                 else:
                     sachovnica[row][col] = ' '
-
         elif row < ((n + 1) / 2) - 1 or row > ((n + 1) / 2) + 1:
             for col in range(n + 1):
                 if col == 0:
@@ -133,58 +131,50 @@ def gensachovnicu(n):
     return sachovnica
 
 
-def load_pawns(idx_player, n):
+def initialize_players():
+    """Initialize pawns for each player and """
+    for idx_player in range(len(player_list)):
+        load_pawns(board_size_input, idx_player)
+        gen_playing_field(board_size_input, idx_player)
+
+
+def load_pawns(n, idx_player):
     """Loads pawns for one player."""
     num_of_pawns = int((n - 3) / 2)
-    for i in range(num_of_pawns):
-        image = 'A' + str(i)
-        player_list[idx_player].pawns.append(Pawn(image, False))
+    if idx_player == 0:
+        for i in range(num_of_pawns):
+            image = 'A'
+            player_list[idx_player].pawns.append(Pawn(image, False))
+    elif idx_player == 1:
+        for i in range(num_of_pawns):
+            image = 'B'
+            player_list[idx_player].pawns.append(Pawn(image, False))
 
 
 # Loading quadrants of player paths.
 def load_quadrant_1(row_beg, row_end, col_beg, col_end, idx_player):
     for row in range(row_beg, row_end):
         for col in range(col_beg, col_end):
-            if sachovnica[row][col] == '*':
-                point = Point()
-                point.x = row
-                point.y = col
-                point.image = sachovnica[row][col]
-                player_list[idx_player].board.append(point)
+            player_list[idx_player].add_point_to_board(row, col, '*')
 
 
 def load_quadrant_2(row_beg, row_end, col_beg, col_end, idx_player):
     for row in range(row_beg, row_end):
         for col in range(col_beg, col_end, -1):
-            if sachovnica[row][col] == '*':
-                point = Point()
-                point.x = row
-                point.y = col
-                point.image = sachovnica[row][col]
-                player_list[idx_player].board.append(point)
+            player_list[idx_player].add_point_to_board(row, col, '*')
     player_list[idx_player].last_position = len(player_list[idx_player].board) + 1
 
 
 def load_quadrant_3(row_beg, row_end, col_beg, col_end, idx_player):
     for row in range(row_beg, row_end, -1):
         for col in range(col_beg, col_end, -1):
-            if sachovnica[row][col] == '*':
-                point = Point()
-                point.x = row
-                point.y = col
-                point.image = sachovnica[row][col]
-                player_list[idx_player].board.append(point)
+            player_list[idx_player].add_point_to_board(row, col, '*')
 
 
 def load_quadrant_4(row_beg, row_end, col_beg, col_end, idx_player):
     for row in range(row_beg, row_end, -1):
         for col in range(col_beg, col_end):
-            if sachovnica[row][col] == '*':
-                point = Point()
-                point.x = row
-                point.y = col
-                point.image = sachovnica[row][col]
-                player_list[idx_player].board.append(point)
+            player_list[idx_player].add_point_to_board(row, col, '*')
     player_list[idx_player].last_position = len(player_list[idx_player].board) + 1
 
 
@@ -193,35 +183,26 @@ def load_homes(row_beg, row_end, col_beg, col_end, idx_player):
     if idx_player == 0:
         for row in range(row_beg, row_end):
             for col in range(col_beg, col_end):
-                if sachovnica[row][col] == 'D':
-                    point = Point()
-                    point.x = row
-                    point.y = col
-                    point.image = sachovnica[row][col]
-                    player_list[idx_player].board.append(point)
+                player_list[idx_player].add_point_to_board(row, col, 'D')
     elif idx_player == 1:
         for row in range(row_beg, row_end, -1):
             for col in range(col_beg, col_end):
-                if sachovnica[row][col] == 'D':
-                    point = Point()
-                    point.x = row
-                    point.y = col
-                    point.image = sachovnica[row][col]
-                    player_list[idx_player].board.append(point)
+                player_list[idx_player].add_point_to_board(row, col, 'D')
 
 
 # Generating playing fields for each player.
 def gen_playing_field(board_size, idx_player):
     """Counting right margins for board size.
-    Loading quadrants for player 1."""
+    Loading quadrants for each player.
+    Commented ref values are for board_size 9."""
     r_start = int(((board_size + 1) / 2) + 1)  # 6
     r_end = int(((board_size + 1) / 2) - 1)  # 4
-    r_max = int(board_size + 1)  # 10
+    max = int(board_size + 1)  # 10
     c_start = int(board_size)  # 9
     c_end = int((board_size + 1) / 2)  # 5
     if idx_player == 0:
-        load_quadrant_1(0, r_start, r_start, r_max, idx_player)
-        load_quadrant_2(r_start, r_max, c_start, r_end, idx_player)
+        load_quadrant_1(0, r_start, r_start, max, idx_player)
+        load_quadrant_2(r_start, max, c_start, r_end, idx_player)
         load_quadrant_3(c_start, r_end, r_end, 0, idx_player)
         load_quadrant_4(r_end, 0, 1, r_start, idx_player)
         load_homes(0, c_end, r_end, r_start, idx_player)
@@ -229,25 +210,21 @@ def gen_playing_field(board_size, idx_player):
     elif idx_player == 1:
         load_quadrant_3(c_start, r_end, r_end, 0, idx_player)
         load_quadrant_4(r_end, 0, 1, r_start, idx_player)
-        load_quadrant_1(0, r_start, r_start, r_max, idx_player)
-        load_quadrant_2(r_start, r_max, c_start, r_end, idx_player)
+        load_quadrant_1(0, r_start, r_start, max, idx_player)
+        load_quadrant_2(r_start, max, c_start, r_end, idx_player)
         load_homes(c_start, c_end, r_end, r_start, idx_player)
         set_default_position(0, idx_player)
-
 
 
 def set_default_position(position, idx_player):
     """Set starting position for every pawn."""
     player_list[idx_player].position = position
-    x = player_list[idx_player].board[player_list[idx_player].position].x
-    y = player_list[idx_player].board[player_list[idx_player].position].y
-    pawn_id = player_list[idx_player].idx_pawn_in_game
-    pawn = player_list[idx_player].pawns[pawn_id]
-    sachovnica[x][y] = pawn.image
+    player_list[idx_player].place_pawn()
 
 
 def set_position(roll_dice, idx_player):
-    """Set new position by adding rolled number to current position."""
+    """Set new position by adding rolled number to current position.
+    Return if pawn is in home or not."""
     current_position = player_list[idx_player].position
     current_position += roll_dice
     if current_position < len(player_list[idx_player].board):
@@ -259,19 +236,15 @@ def set_position(roll_dice, idx_player):
 
         # Place pawn on new position.
         player_list[idx_player].position = current_position
-        x = player_list[idx_player].board[player_list[idx_player].position].x
-        y = player_list[idx_player].board[player_list[idx_player].position].y
-        pawn_id = player_list[idx_player].idx_pawn_in_game
-        pawn = player_list[idx_player].pawns[pawn_id]
-        sachovnica[x][y] = pawn.image
+        player_list[idx_player].place_pawn()
 
         # Checks if pawn is in home.
         # Incrementing current_position to match length of board
         if (current_position + 1) == len(player_list[idx_player].board):
-            pawn = player_list[idx_player].pawns[pawn_id]
+            pawn = player_list[idx_player].pawns[player_list[idx_player].idx_pawn_in_game]
             pawn.is_in_home = True
-            player_list[idx_player].finished = player_list[idx_player].take_another_pawn()        # Taking out another pawn
-            player_list[idx_player].board.pop()      # Removing last element from board because it's occupied by our pawn
+            player_list[idx_player].finished = player_list[idx_player].take_another_pawn()  # Taking out another pawn
+            player_list[idx_player].board.pop()     # Removing last element from board because it's occupied by our pawn
             return True
         return False
     else:
@@ -284,46 +257,38 @@ def tlacsachovnicu(sachovnica):
         print(' ' .join([str(elem) for elem in row]))
 
 
-def roll_dice():
-    """Generates random integer from 1 to 6 as our rolled number."""
-    rolled_number = random.randint(1, 6)
-    return rolled_number
-
-
-def run_game(counter=0):
-    """Starts our game loop."""
-    idx_player = 0
+def run_game(counter=0, idx_player=random.randint(0, 1)):
+    """Starts our game loop.
+    Switch between two players.
+    """
+    gensachovnicu(board_size_input)
+    initialize_players()
+    tlacsachovnicu(sachovnica)  # Printing our board with initial positions.
     while True:
         counter += 1        # Counting number of moves.
-        print('\nMove no.:', counter)
-        num = roll_dice()
+        print('\nPlayer', idx_player + 1, 'turn.')
+        print('Move no.:', counter)
+        num = random.randint(1, 6)
         print('Rolled number:', num)
         is_in_home = set_position(num, idx_player)
         if player_list[idx_player].finished is True:
             tlacsachovnicu(sachovnica)
-            print('Player finished.', idx_player)
+            print('Player', idx_player + 1, 'won.')
             break
         if is_in_home is True:
             set_default_position(0, idx_player)
             set_default_position(0, idx_player)
-        if idx_player < max_players - 1:
+        tlacsachovnicu(sachovnica)
+        if num == 6:
+            continue
+        elif idx_player < 1:
             idx_player += 1
         else:
             idx_player = 0
-        tlacsachovnicu(sachovnica)
 
 
-check_input(board_size_input)
-gensachovnicu(board_size_input)
-# Create players
-playerA = Player()
-playerB = Player()
-# Adding players
-player_list.append(playerA)
-player_list.append(playerB)
-load_pawns(0, board_size_input)     # For Player(0) - A.
-load_pawns(1, board_size_input)
-gen_playing_field(board_size_input, 0)  # For Player(0)
-gen_playing_field(board_size_input, 1)
-tlacsachovnicu(sachovnica)      # Printing our board with initial positions
+# Initialization of main elements.
+board_size_input = check_input()
+sachovnica = [[''] * (board_size_input + 1) for i in range(board_size_input + 1)]
+player_list = [Player() for player_number in range(2)]
 run_game()

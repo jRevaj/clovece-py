@@ -1,1 +1,1 @@
-Very simple ludo console simulation
+Very simple console simulation
